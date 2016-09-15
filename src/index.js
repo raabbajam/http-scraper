@@ -4,7 +4,7 @@ const Debug = require('debug');
 const path = require('path');
 const fs = Promise.promisifyAll(require('fs-extra'));
 const absoluteAllResource = require('./libs/rel-to-abs');
-const debug = Debug('http-scrapers:main');
+const debug = Debug('http-scraper:main');
 function Http(options = {}) {
   const properties = initialize(options);
   const prototypes = {
@@ -67,8 +67,9 @@ function initialize(options) {
   return initialProperties;
 }
 
-function getCookies() {
-  return this.jar.getCookies(this.uri);
+function getCookies(url = '') {
+  url = url || this.uri;
+  return this.jar.getCookies(url);
 }
 
 function setCookies(cookies) {
