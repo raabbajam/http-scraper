@@ -1,10 +1,9 @@
-import Debug from 'debug';
-const debug = Debug('pluto:http:test');
-import Promise from 'bluebird';
-import test from 'tape';
-import fse from 'fs-extra';
-import path from 'path';
-import Http from '../src';
+const Promise = require('bluebird');
+const test = require('tape');
+const fse = require('fs-extra');
+const path = require('path');
+const debug = require('debug')('http-scraper:test');
+const Http = require('../src');
 const fs = Promise.promisifyAll(fse);
 test('libs http get', (assert) => {
   const host = 'api.ipify.org';

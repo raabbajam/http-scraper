@@ -1,29 +1,29 @@
-import Promise from 'bluebird';
-import fse from 'fs-extra';
-import Request from 'request';
-import Debug from 'debug';
-import path from 'path';
-import absoluteAllResource from './libs/rel-to-abs';
-const fs = Promise.promisifyAll(fse);
+const Promise = require('bluebird');
+const Request = require('request');
+const Debug = require('debug');
+const path = require('path');
+const fs = Promise.promisifyAll(require('fs-extra'));
+const absoluteAllResource = require('./libs/rel-to-abs');
 const debug = Debug('http-scrapers:main');
-const http = {
-  requestAsync,
-  get,
-  post,
-  stream,
-  getCookies,
-  setCookies,
-  resetCookies,
-  saveFile,
-  saveHtml,
-  savePDF,
-  saveImage,
-};
-export default function Http(options = {}) {
-  const initialProperties = initialize(options);
-  const httpInstance = Object.create(http);
-  return Object.assign(httpInstance, initialProperties);
+function Http(options = {}) {
+  const properties = initialize(options);
+  const prototypes = {
+    requestAsync,
+    get,
+    post,
+    stream,
+    getCookies,
+    setCookies,
+    resetCookies,
+    saveFile,
+    saveHtml,
+    savePDF,
+    saveImage,
+    saveJson,
+  };
+  return Object.assign(Object.create(prototypes), properties);
 }
+module.exports = Http;
 
 function initialize(options) {
   const {
@@ -162,16 +162,22 @@ function saveHtml(name, currentUrl) {
   return this.saveFile(name, {currentUrl, ext, convertAbsolute});
 }
 
-function savePDF(name, currentUrl) {
+function savePDF(name) {
   const ext = 'pdf';
   const encoding = 'binary';
-  return this.saveFile(name, {currentUrl, ext, encoding});
+  return this.saveFile(name, {ext, encoding});
 }
 
-function saveImage(name, currentUrl) {
+function saveImage(name) {
   const ext = 'jpg';
   const encoding = 'binary';
-  return this.saveFile(name, {currentUrl, ext, encoding});
+  return this.saveFile(name, {ext, encoding});
+}
+
+function saveJson(name, currentUrl) {
+  const ext = 'json';
+  const transform = (text) => typeof text === 'object' ? JSON.stringify(text, null, 2) : text;
+  return this.saveFile(name, {currentUrl, ext, transform});
 }
 
 function saveFile(name, options = {}) {
@@ -180,6 +186,7 @@ function saveFile(name, options = {}) {
     ext = 'html',
     encoding = 'utf8',
     convertAbsolute = false,
+    transform,
   } = options;
   if (!this.capture) {
     return Promise.resolve();
@@ -188,6 +195,7 @@ function saveFile(name, options = {}) {
   debug(`Capture ${name} to ${filepath}`);
   return (text) => {
     text = convertAbsolute ? absoluteAllResource.convert(text, currentUrl) : text;
+    text = transform ? transform(text) : text;
     return fs.outputFileAsync(filepath, text, encoding);
   };
 }

@@ -1,6 +1,5 @@
-import cheerio from 'cheerio';
-import url from 'url';
-
+const cheerio = require('cheerio');
+const url = require('url');
 function convert(base_url, currentUrl) {
   if (!currentUrl || /^(https?|file|ftps?|mailto|javascript|data:image\/[^;]{2,9};):/i.test(currentUrl)) {
     return currentUrl;
@@ -8,7 +7,7 @@ function convert(base_url, currentUrl) {
   return url.resolve(base_url, currentUrl);
 }
 
-export default {
+module.exports = {
   convert(html, base_url) {
     const $ = cheerio.load(html);
     $('img, script').each((index, el) => {
