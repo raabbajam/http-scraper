@@ -1,6 +1,6 @@
 {
   "name": "http-scraper",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "http libs with extended utilities",
   "main": "src/index.js",
   "files": [
