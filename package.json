@@ -1,6 +1,6 @@
 {
   "name": "http-scraper",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "http libs with extended utilities",
   "main": "src/index.js",
   "files": [
@@ -48,5 +48,7 @@
     "fs-extra": "^0.30.0",
     "request": "^2.69.0"
   },
-  "publishConfig":{"registry":"https://registry.npmjs.org/"}
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
 }
