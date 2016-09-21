@@ -5,23 +5,28 @@ const path = require('path');
 const fs = Promise.promisifyAll(require('fs-extra'));
 const absoluteAllResource = require('./libs/rel-to-abs');
 const debug = Debug('http-scraper:main');
+const prototypes = {
+  requestAsync,
+  get,
+  post,
+  stream,
+  getCookies,
+  setCookies,
+  resetCookies,
+  saveFile,
+  saveHtml,
+  savePDF,
+  saveImage,
+  saveJson,
+  saveJsonResult,
+  setRefererHeaders,
+  setAjaxHeaders,
+  createStorage,
+};
 function Http(options = {}) {
   const properties = initialize(options);
-  const prototypes = {
-    requestAsync,
-    get,
-    post,
-    stream,
-    getCookies,
-    setCookies,
-    resetCookies,
-    saveFile,
-    saveHtml,
-    savePDF,
-    saveImage,
-    saveJson,
-  };
-  return Object.assign(Object.create(prototypes), properties);
+  const http = Object.assign(Object.create(prototypes), properties);
+  return http;
 }
 module.exports = Http;
 
@@ -37,7 +42,11 @@ function initialize(options) {
     type = 'unknown',
     capture = false,
     capturePath = '.',
+    ajaxHeaders = {},
   } = options;
+  const defaultAjaxHeaders = {
+    'X-Requested-With': 'XMLHttpRequest',
+  };
   const defaultHeaders = {
     Host: host,
     Accept: '*/*',
@@ -51,6 +60,7 @@ function initialize(options) {
     followAllRedirects,
     headers: Object.assign({}, defaultHeaders, headers),
   };
+  Object.assign(ajaxHeaders, defaultAjaxHeaders);
   const request = Promise.promisifyAll(Request.defaults(defaultRequestOptions));
   const logs = [];
   const initialProperties = {
@@ -63,6 +73,7 @@ function initialize(options) {
     jar,
     uri,
     delay,
+    ajaxHeaders,
   };
   return initialProperties;
 }
@@ -181,6 +192,10 @@ function saveJson(name, currentUrl) {
   return this.saveFile(name, {currentUrl, ext, transform});
 }
 
+function saveJsonResult(name) {
+  return this.saveJson(`result-${name}`);
+}
+
 function saveFile(name, options = {}) {
   const {
     currentUrl = this.uri,
@@ -203,4 +218,25 @@ function saveFile(name, options = {}) {
 
 function requiredParameter(name) {
   throw new Error(`Missing parameter ${name}`);
+}
+
+function setRefererHeaders(options, referer = '') {
+  options.headers = options.headers || {};
+  Object.assign(options.headers, {referer});
+  return options;
+}
+
+function setAjaxHeaders(options) {
+  options.headers = options.headers || {};
+  Object.assign(options.headers, this.ajaxHeaders);
+  return options;
+}
+
+function createStorage(obj) {
+  return save.bind(obj);
+  function save(key) {
+    return (value) => {
+      this[key] = value;
+    };
+  }
 }
