@@ -8,4 +8,4 @@
 
 ### v1.0.0
 
- * pluto-http initial commit.
+ * http-scraper initial commit.
